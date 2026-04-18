@@ -1,1 +1,99 @@
+/*第一种办法，即我的直觉是通过栈来判断回文，但首先就要处理
+  奇数链表和偶数链表的问题*/
 
+typedef struct{
+    int data[1000000];
+    int top;
+}stack;
+
+void initstack(stack *s){
+    s->top = -1;
+}
+
+bool isfull(stack *s){
+    return s->top == 999999;
+}
+
+bool isempty(stack *s){
+    return s->top == -1;
+}
+
+bool push(stack *s, int val){
+    if(isfull(s)){
+        return false;
+    }
+    s->data[++(s->top)] = val;
+    return true;
+}
+
+bool pop(stack *s, int *topval){
+    if(isempty(s)){
+        return false;
+    }
+    *topval = s->data[(s->top)--];
+    return true;
+}
+
+stack s;
+
+bool isPalindrome(struct ListNode* head) {
+    initstack(&s);
+    int topval;
+    int len = 0;
+    struct ListNode *p = head;
+    while(p != NULL){
+        len++;
+        p = p->next;
+    }
+    p = head;
+    for(int i=0;i<len/2;i++){
+        push(&s, p->val);
+        p = p->next;
+    }
+    if(len%2 == 1){
+        p = p->next;
+    }
+    while(p != NULL){
+        pop(&s, &topval);
+        if(topval != p->val)return false;
+        p = p->next;
+    }
+    return true;
+}
+
+
+/*第二种方法是通过建立快慢指针来找到链表中点，之后将后一半链表反转
+  通过双指针依次比较元素来判断回文*/
+bool isPalindrome(struct ListNode* head) {
+    struct ListNode* slow = head;
+    struct ListNode* fast = head;
+
+    while (fast != NULL && fast->next != NULL) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    struct ListNode* prev = NULL;
+    struct ListNode* curr = slow;
+    struct ListNode* next = NULL;
+
+    while (curr != NULL) {
+        next = curr->next;
+        curr->next = prev;
+        prev = curr;
+        curr = next;
+    }
+
+    struct ListNode* firstHalf = head;
+    struct ListNode* secondHalf = prev;
+
+    while (secondHalf != NULL) {
+        if (firstHalf->val != secondHalf->val) {
+            return false;
+        }
+        firstHalf = firstHalf->next;
+        secondHalf = secondHalf->next;
+    }
+
+    return true;
+}
