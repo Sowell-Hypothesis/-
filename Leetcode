@@ -1,99 +1,64 @@
-/*第一种办法，即我的直觉是通过栈来判断回文，但首先就要处理
-  奇数链表和偶数链表的问题*/
+/*这道题通过栈对栈中所储存的数据进行操作，相比较而言，
+  更重要的是理解其中的二级字符串指针的原理，以及atoi
+  关键字的作用：将字符串指针转化成对应的整数*/
 
 typedef struct{
-    int data[1000000];
-    int top;
-}stack;
+        int data[1000];
+        int top;
+    }stack;
 
-void initstack(stack *s){
-    s->top = -1;
-}
-
-bool isfull(stack *s){
-    return s->top == 999999;
-}
-
-bool isempty(stack *s){
-    return s->top == -1;
-}
-
-bool push(stack *s, int val){
-    if(isfull(s)){
-        return false;
-    }
-    s->data[++(s->top)] = val;
-    return true;
-}
-
-bool pop(stack *s, int *topval){
-    if(isempty(s)){
-        return false;
-    }
-    *topval = s->data[(s->top)--];
-    return true;
-}
-
-stack s;
-
-bool isPalindrome(struct ListNode* head) {
-    initstack(&s);
-    int topval;
-    int len = 0;
-    struct ListNode *p = head;
-    while(p != NULL){
-        len++;
-        p = p->next;
-    }
-    p = head;
-    for(int i=0;i<len/2;i++){
-        push(&s, p->val);
-        p = p->next;
-    }
-    if(len%2 == 1){
-        p = p->next;
-    }
-    while(p != NULL){
-        pop(&s, &topval);
-        if(topval != p->val)return false;
-        p = p->next;
-    }
-    return true;
-}
-
-
-/*第二种方法是通过建立快慢指针来找到链表中点，之后将后一半链表反转
-  通过双指针依次比较元素来判断回文*/
-bool isPalindrome(struct ListNode* head) {
-    struct ListNode* slow = head;
-    struct ListNode* fast = head;
-
-    while (fast != NULL && fast->next != NULL) {
-        slow = slow->next;
-        fast = fast->next->next;
+    void initstack(stack *s){
+        s->top = -1;
     }
 
-    struct ListNode* prev = NULL;
-    struct ListNode* curr = slow;
-    struct ListNode* next = NULL;
-
-    while (curr != NULL) {
-        next = curr->next;
-        curr->next = prev;
-        prev = curr;
-        curr = next;
+    bool isfull(stack *s){
+        return s->top == 999;
     }
 
-    struct ListNode* firstHalf = head;
-    struct ListNode* secondHalf = prev;
+    bool isempty(stack *s){
+        return s->top == -1;
+    }
 
-    while (secondHalf != NULL) {
-        if (firstHalf->val != secondHalf->val) {
+    bool push(stack *s, int val){
+        if(isfull(s)){
             return false;
         }
-        firstHalf = firstHalf->next;
-        secondHalf = secondHalf->next;
+        s->data[++(s->top)] = val;
+        return true;
     }
+
+    bool pop(stack *s, int *topval){
+        if(isempty(s)){
+            return false;
+        }
+        *topval = s->data[(s->top)--];
+        return true;
+    }
+
+
+
+int calPoints(char** operations, int operationsSize) {
+    int i=0, topval;
+    stack s;
+    initstack(&s);
+    for(i=0;i<operationsSize;i++){
+        char first = operations[i][0];
+        if(first>='0' && first<='9' || first == '-'){
+            push(&s, atoi(operations[i]));
+        }else if(operations[i][0] == 'C'){
+            pop(&s, &topval);
+        }else if(operations[i][0] == 'D'){
+            push(&s, s.data[s.top]*2);
+        }else if(operations[i][0] == '+'){
+            push(&s, s.data[s.top] + s.data[s.top-1]);
+        }
+    }
+    int sum = 0;
+    for(i=0;i<=s.top;i++){
+        sum += s.data[i];
+    }
+    return sum;
+}
 
     return true;
 }
